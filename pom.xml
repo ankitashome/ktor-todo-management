@@ -1,0 +1,272 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.anksho.todo</groupId>
+    <artifactId>todo-management</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>todo-management</name>
+    <description>todo-management-api</description>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <kotlin.code.style>official</kotlin.code.style>
+
+        <java.version>21</java.version>
+        <netty.version>4.1.117.Final</netty.version>
+        <kotlin.version>2.1.10</kotlin.version>
+        <ktor.version>3.0.3</ktor.version>
+        <logback.version>1.4.14</logback.version>
+        <slf4j.version>2.0.9</slf4j.version>
+        <micrometer.version>1.14.3</micrometer.version>
+        <kotlinx.serialization.version>1.8.0</kotlinx.serialization.version>
+
+        <kotest.version>5.9.1</kotest.version>
+    </properties>
+
+    <!--    <repositories>-->
+    <!--        <repository>-->
+    <!--            <id>mavenCentral</id>-->
+    <!--            <url>https://repo1.maven.org/maven2/</url>-->
+    <!--        </repository>-->
+    <!--    </repositories>-->
+
+    <build>
+        <sourceDirectory>src/main/kotlin</sourceDirectory>
+        <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+        <plugins>
+            <plugin>
+                <groupId>org.jetbrains.kotlin</groupId>
+                <artifactId>kotlin-maven-plugin</artifactId>
+                <version>${kotlin.version}</version>
+                <executions>
+                    <execution>
+                        <id>compile</id>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>compile</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>test-compile</id>
+                        <phase>test-compile</phase>
+                        <goals>
+                            <goal>test-compile</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <jvmTarget>${java.version}</jvmTarget>
+                    <compilerPlugins>
+                        <plugin>kotlinx-serialization</plugin>
+                    </compilerPlugins>
+                    <args>
+                        <arg>-opt-in=kotlin.time.ExperimentalTime,kotlin.RequiresOptIn</arg>
+                    </args>
+                </configuration>
+                <dependencies>
+                    <dependency>
+                        <groupId>org.jetbrains.kotlin</groupId>
+                        <artifactId>kotlin-maven-serialization</artifactId>
+                        <version>${kotlin.version}</version>
+                    </dependency>
+                </dependencies>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.5.0</version>
+                <configuration>
+                    <testSourceDirectory>src/test/kotlin</testSourceDirectory>
+                    <useFile>false</useFile>
+                    <includes>
+                        <include>**/*Test.kt</include>
+                    </includes>
+                    <argLine>
+                        --add-opens java.base/java.nio=ALL-UNNAMED
+                        --add-opens java.base/jdk.internal.misc=ALL-UNNAMED
+                        -Dio.netty.tryReflectionSetAccessible=true
+                    </argLine>
+                    <statelessTestsetReporter>
+                        <disable>true</disable>
+                    </statelessTestsetReporter>
+                    <disableXmlReport>true</disableXmlReport>
+                    <systemPropertyVariables>
+                        <!-- where to put kotest test reports  -->
+                        <gradle.build.dir>${project.build.directory}</gradle.build.dir>
+                    </systemPropertyVariables>
+                </configuration>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-shade-plugin</artifactId>
+                <version>3.3.0</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>shade</goal>
+                        </goals>
+                        <configuration>
+                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <transformers>
+                                <transformer
+                                        implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+                                    <mainClass>com.anksho.todo.management.ApplicationKt</mainClass>
+                                </transformer>
+                            </transformers>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-enforcer-plugin</artifactId>
+                <version>3.5.0</version>
+                <executions>
+                    <execution>
+                        <id>enforce-maven</id>
+                        <goals>
+                            <goal>enforce</goal>
+                        </goals>
+                        <configuration>
+                            <rules>
+                                <requireMavenVersion>
+                                    <version>3.6.3</version>
+                                </requireMavenVersion>
+                            </rules>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
+    <dependencies>
+<!--        <dependency>-->
+<!--            <groupId>org.jetbrains.kotlin</groupId>-->
+<!--            <artifactId>kotlin-stdlib-jdk8</artifactId>-->
+<!--            <version>${kotlin.version}</version>-->
+<!--        </dependency>-->
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-core-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-content-negotiation-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-status-pages-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-serialization-kotlinx-json-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-auth-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-auth-jwt-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-netty-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-metrics-micrometer-jvm</artifactId>
+            <version>${ktor.version}</version>
+        </dependency>
+
+        <!-- kotlinx serialization-->
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-json-jvm</artifactId>
+            <version>${kotlinx.serialization.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlinx</groupId>
+            <artifactId>kotlinx-serialization-core-jvm</artifactId>
+            <version>${kotlinx.serialization.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>${micrometer.version}</version>
+        </dependency>
+        <!-- Logging -->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>${logback.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-api</artifactId>
+            <version>${slf4j.version}</version>
+        </dependency>
+        <!-- Testing -->
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-bom</artifactId>
+            <version>${kotest.version}</version>
+            <type>pom</type>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-runner-junit5-jvm</artifactId>
+            <version>${kotest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-assertions-core-jvm</artifactId>
+            <version>${kotest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.kotest</groupId>
+            <artifactId>kotest-extensions-junitxml-jvm</artifactId>
+            <version>${kotest.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>io.ktor</groupId>
+            <artifactId>ktor-server-test-host-jvm</artifactId>
+            <version>${ktor.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.jetbrains.kotlin</groupId>
+            <artifactId>kotlin-test</artifactId>
+            <version>${kotlin.version}</version>
+            <scope>test</scope>
+        </dependency>
+        <!--        <dependency>-->
+        <!--            <groupId>org.jetbrains.kotlin</groupId>-->
+        <!--            <artifactId>kotlin-test-junit5</artifactId>-->
+        <!--            <version>2.1.0</version>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
+        <!--        <dependency>-->
+        <!--            <groupId>org.junit.jupiter</groupId>-->
+        <!--            <artifactId>junit-jupiter</artifactId>-->
+        <!--            <version>5.10.0</version>-->
+        <!--            <scope>test</scope>-->
+        <!--        </dependency>-->
+    </dependencies>
+
+</project>
