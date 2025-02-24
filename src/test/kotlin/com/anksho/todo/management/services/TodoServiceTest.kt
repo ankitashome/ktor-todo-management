@@ -12,6 +12,31 @@ import kotlin.uuid.ExperimentalUuidApi
 class TodoServiceTest : ShouldSpec({
     val todoService = TodoService(SimpleMeterRegistry())
 
+    should("fetch sorted TODOs on priority alphabetically") {
+        //given tasks
+        val todos = listOf(
+            Todo(title = "Z", priority = Priority.HIGH),
+            Todo(title = "E", priority = Priority.LOW),
+            Todo(title = "B", priority = Priority.LOW),
+            Todo(title = "R", priority = Priority.MEDIUM),
+            Todo(title = "A", priority = Priority.MEDIUM)
+        )
+        todos.map { todoService.createTodo(it) }
+
+        //when
+        val sortedTodos = todoService.getAllTodos().map { it.priority to it.title }
+
+        //then
+        val expectedSortedTodos = listOf(
+            Priority.HIGH to "Z",
+            Priority.MEDIUM to "A",
+            Priority.MEDIUM to "R",
+            Priority.LOW to "B",
+            Priority.LOW to "E"
+        )
+        sortedTodos shouldBe expectedSortedTodos
+    }
+
     should("create a new TODO") {
         //given
         val todo = Todo(title = "Test TODO", description = "Description", priority = Priority.LOW)
@@ -26,13 +51,17 @@ class TodoServiceTest : ShouldSpec({
             priority shouldBe Priority.LOW
             completed shouldBe false
         }
-        todoService.getAllTodos().size shouldBe 1
     }
 
     should("retrieve an existing TODO") {
         //given
-        val todo =
-            todoService.createTodo(Todo(title = "Fetch Test", description = "Description", priority = Priority.MEDIUM))
+        val todo = todoService.createTodo(
+            Todo(
+                title = "Fetch Test",
+                description = "Description",
+                priority = Priority.MEDIUM
+            )
+        )
         //when
         val retrieved = todoService.getTodoById(todo.id.toString())
         //then

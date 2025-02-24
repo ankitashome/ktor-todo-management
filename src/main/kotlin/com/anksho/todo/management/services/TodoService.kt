@@ -29,7 +29,10 @@ class TodoService(meterRegistry: MeterRegistry) {
         .description("Time taken to update a todo")
         .register(meterRegistry)
 
-    fun getAllTodos(): List<Todo> = todosStore.values.toList()
+    fun getAllTodos(): List<Todo> = todosStore.values.sortedWith(
+        compareByDescending<Todo> { it.priority.ordinal }
+            .thenBy { it.title.lowercase() }
+    )
 
     fun getTodoById(id: String): Todo? = todosStore[Uuid.parse(id)]
 

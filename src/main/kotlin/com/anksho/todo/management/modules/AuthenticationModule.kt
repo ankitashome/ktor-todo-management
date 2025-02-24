@@ -38,6 +38,6 @@ fun generateToken(username: String): String = JWT.create()
     .withIssuer(issuer)
     .withAudience(audience)
     .withClaim("username", username)
-    .withExpiresAt(Date(System.currentTimeMillis() + 3600 * 1000))
+    .withExpiresAt(Date(System.currentTimeMillis() + 3600 * 1000)) // 1 hour expiry
     .sign(Algorithm.HMAC256(secret))
 

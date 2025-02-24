@@ -167,7 +167,6 @@ mvn test
 ## Future Enhancements
 - Persistent storage
 - Users and multitenancy
-- Priority based TODO sorting
 - Simple UI
 - History of TODO item changes tracking
 
