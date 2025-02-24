@@ -13,15 +13,20 @@ import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.serialization.json.Json.Default.decodeFromString
 
 class AuthRoutesTest : ShouldSpec({
+    val meterRegistry: MeterRegistry = SimpleMeterRegistry()
+
     should("register new user") {
         testApplication {
+
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             val response = client.post("auth/v1/register") {
@@ -39,7 +44,7 @@ class AuthRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             val response = client.post("auth/v1/register") {
@@ -60,7 +65,7 @@ class AuthRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             //given: registered user
@@ -86,7 +91,7 @@ class AuthRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             //given: registered user

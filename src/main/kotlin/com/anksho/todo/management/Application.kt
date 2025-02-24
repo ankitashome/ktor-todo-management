@@ -1,8 +1,9 @@
 package com.anksho.todo.management
 
-import com.anksho.todo.management.api.authRoutes
 import com.anksho.todo.management.api.customExceptionMappers
-import com.anksho.todo.management.api.todoRoutes
+import com.anksho.todo.management.api.routes.PrometheusRoutes
+import com.anksho.todo.management.api.routes.authRoutes
+import com.anksho.todo.management.api.routes.todoRoutes
 import com.anksho.todo.management.modules.LifecycleModule.configureLifecycle
 import com.anksho.todo.management.modules.configureAuthentication
 import com.anksho.todo.management.modules.configureMonitoring
@@ -14,7 +15,10 @@ import io.ktor.server.engine.embeddedServer
 import io.ktor.server.netty.Netty
 import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.routing.route
 import io.ktor.server.routing.routing
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.prometheusmetrics.PrometheusMeterRegistry
 import kotlinx.serialization.json.Json
 
 fun main() {
@@ -29,9 +33,9 @@ fun Application.module() {
     configureLifecycle()
     configureSerialization()
     configureAuthentication()
-    configureRouting()
+    val meterRegistry = configureMonitoring()
+    configureRouting(meterRegistry)
     configureStatusPages()
-    configureMonitoring()
 }
 
 fun Application.configureSerialization() {
@@ -44,11 +48,15 @@ fun Application.configureSerialization() {
     }
 }
 
-fun Application.configureRouting() {
-    val todoService = TodoService()
+fun Application.configureRouting(meterRegistry: MeterRegistry) {
+    val todoService = TodoService(meterRegistry)
     routing {
         authRoutes()
         todoRoutes(todoService)
+        route("/metrics") {
+            PrometheusRoutes(meterRegistry as PrometheusMeterRegistry).mount(this)
+        }
+
     }
 }
 

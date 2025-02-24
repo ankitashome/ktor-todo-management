@@ -20,18 +20,21 @@ import io.ktor.http.HttpHeaders
 import io.ktor.http.HttpStatusCode
 import io.ktor.http.contentType
 import io.ktor.server.testing.testApplication
+import io.micrometer.core.instrument.MeterRegistry
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlinx.serialization.json.Json.Default.decodeFromString
 import java.util.*
 
 class TodoRoutesTest : ShouldSpec({
     lateinit var token: String
+    val meterRegistry: MeterRegistry = SimpleMeterRegistry()
 
     beforeTest {
         testApplication {
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             client.post("auth/v1/register") {
@@ -51,7 +54,7 @@ class TodoRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             val response = client.get("/api/v1/todos")
@@ -64,7 +67,7 @@ class TodoRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             val response = client.get("/api/v1/todos") {
@@ -79,7 +82,7 @@ class TodoRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             val response = client.post("/api/v1/todos") {
@@ -97,7 +100,7 @@ class TodoRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
             //given
             val createResponse: ApiTodo = decodeFromString(client.post("/api/v1/todos") {
@@ -126,7 +129,7 @@ class TodoRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
             //given
             val createResponse = decodeFromString<ApiTodo>(client.post("/api/v1/todos") {
@@ -162,7 +165,7 @@ class TodoRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
             //given
             val createResponse = decodeFromString<ApiTodo>(client.post("/api/v1/todos") {
@@ -203,7 +206,7 @@ class TodoRoutesTest : ShouldSpec({
             application {
                 configureSerialization()
                 configureAuthentication()
-                configureRouting()
+                configureRouting(meterRegistry)
             }
 
             val expiredToken = generateExpiredToken()

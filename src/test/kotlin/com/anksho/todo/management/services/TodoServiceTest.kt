@@ -4,12 +4,13 @@ import com.anksho.todo.management.domain.Priority
 import com.anksho.todo.management.domain.Todo
 import io.kotest.core.spec.style.ShouldSpec
 import io.kotest.matchers.shouldBe
+import io.micrometer.core.instrument.simple.SimpleMeterRegistry
 import kotlin.uuid.ExperimentalUuidApi
 
 
 @OptIn(ExperimentalUuidApi::class)
 class TodoServiceTest : ShouldSpec({
-    val todoService = TodoService()
+    val todoService = TodoService(SimpleMeterRegistry())
 
     should("create a new TODO") {
         //given
