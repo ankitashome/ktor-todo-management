@@ -1,5 +1,7 @@
-package com.anksho.todo.management.api
+package com.anksho.todo.management.api.routes
 
+import com.anksho.todo.management.api.ApiPriority
+import com.anksho.todo.management.api.ApiTodo
 import com.anksho.todo.management.configureRouting
 import com.anksho.todo.management.configureSerialization
 import com.anksho.todo.management.modules.configureAuthentication
