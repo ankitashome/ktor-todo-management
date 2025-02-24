@@ -77,13 +77,8 @@
                     <useFile>false</useFile>
                     <includes>
                         <include>**/*Test.kt</include>
+                        <include>**/*Test</include>
                     </includes>
-                    <properties>
-                        <property>
-                            <name>junit.jupiter.extensions.autodetection.enabled</name>
-                            <value>true</value>
-                        </property>
-                    </properties>
                 </configuration>
             </plugin>
             <plugin>
@@ -216,12 +211,6 @@
         <dependency>
             <groupId>io.kotest</groupId>
             <artifactId>kotest-assertions-core-jvm</artifactId>
-            <version>${kotest.version}</version>
-            <scope>test</scope>
-        </dependency>
-        <dependency>
-            <groupId>io.kotest</groupId>
-            <artifactId>kotest-extensions-junitxml-jvm</artifactId>
             <version>${kotest.version}</version>
             <scope>test</scope>
         </dependency>

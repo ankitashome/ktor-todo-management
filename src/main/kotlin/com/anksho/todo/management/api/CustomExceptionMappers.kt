@@ -1,6 +1,5 @@
 package com.anksho.todo.management.api
 
-import com.auth0.jwt.exceptions.JWTVerificationException
 import io.ktor.http.*
 import io.ktor.http.HttpStatusCode.Companion.BadRequest
 import io.ktor.http.HttpStatusCode.Companion.Unauthorized
@@ -26,10 +25,6 @@ internal fun StatusPagesConfig.customExceptionMappers() {
         log.info("Bad request, url {}, msg: {}", call.request.uri, e.message)
         call.respond(BadRequest, ApiErrorResponse(BadRequest.value, e.message))
     }
-    exception<JWTVerificationException> { call, e ->
-        log.info("Token expiration error, url {}, msg: {}", call.request.uri, e.message)
-        call.respond(Unauthorized, ApiErrorResponse(Unauthorized.value, "Invalid or expired token"))
-    }
     exception<Throwable> { call, e ->
         log.error("Unhandled exception caught, url {}", call.request.uri, e)
         call.respond(
@@ -41,7 +36,7 @@ internal fun StatusPagesConfig.customExceptionMappers() {
     status(Unauthorized) {
         call.respond(
             Unauthorized,
-            ApiErrorResponse(Unauthorized.value, "Invalid token supplied.")
+            ApiErrorResponse(Unauthorized.value, "Invalid/expired token supplied.")
         )
     }
 }
