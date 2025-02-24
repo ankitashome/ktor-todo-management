@@ -31,8 +31,9 @@ fun Route.todoRoutes(todoService: TodoService) {
 
             //Create a new to-do
             post {
-                val todoRequest = call.receive<ApiTodoRequest>().toDomain()
-                call.respond(HttpStatusCode.Created, todoService.createTodo(todoRequest).toApi())
+                val apiTodoRequest = call.receive<ApiTodoRequest>()
+                apiTodoRequest.validate()
+                call.respond(HttpStatusCode.Created, todoService.createTodo(apiTodoRequest.toDomain()).toApi())
             }
 
             //Get a single to-do by id
@@ -50,8 +51,9 @@ fun Route.todoRoutes(todoService: TodoService) {
             //Update(full) an existing to-do
             put("/{id}") {
                 val id = call.parameters["id"] ?: throw BadRequestException("TODO id is required")
-                val toBeUpdatedTodo = call.receive<ApiTodo>().toDomain()
-                val updatedTodo = todoService.updateTodo(id, toBeUpdatedTodo)?.toApi()
+                val apiTodo = call.receive<ApiTodo>()
+                apiTodo.validate()
+                val updatedTodo = todoService.updateTodo(id, apiTodo.toDomain())?.toApi()
 
                 updatedTodo?.let { call.respond(HttpStatusCode.OK, updatedTodo) } ?: call.respond(
                     NotFound,

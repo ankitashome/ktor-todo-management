@@ -9,7 +9,6 @@ import kotlinx.serialization.descriptors.SerialDescriptor
 import kotlinx.serialization.encoding.Decoder
 import kotlinx.serialization.encoding.Encoder
 
-
 @Serializable
 data class ApiLoginRequest(
     @Required
@@ -33,7 +32,7 @@ data class ApiTodoRequest(
     @Serializable(with = ApiPrioritySerializer::class)
     val priority: ApiPriority
 ) {
-    init {
+    fun validate() {
         require(title.length in 3..100) { "Title must be between 3 and 100 characters." }
         require((description?.length ?: 0) <= 500) { "Description cannot exceed 500 characters." }
     }
@@ -56,7 +55,12 @@ data class ApiTodo(
     val priority: ApiPriority,
     @Required
     val completed: Boolean
-)
+) {
+    fun validate() {
+        require(title.length in 3..100) { "Title must be between 3 and 100 characters." }
+        require((description?.length ?: 0) <= 500) { "Description cannot exceed 500 characters." }
+    }
+}
 
 @Serializable
 enum class ApiPriority {

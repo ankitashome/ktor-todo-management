@@ -4,6 +4,7 @@ import com.anksho.todo.management.api.ApiPriority
 import com.anksho.todo.management.api.ApiTodo
 import com.anksho.todo.management.configureRouting
 import com.anksho.todo.management.configureSerialization
+import com.anksho.todo.management.configureStatusPages
 import com.anksho.todo.management.modules.configureAuthentication
 import com.auth0.jwt.JWT
 import com.auth0.jwt.algorithms.Algorithm
@@ -77,6 +78,54 @@ class TodoRoutesTest : ShouldSpec({
                 header(HttpHeaders.Authorization, "Bearer $token")
             }
             response.status shouldBe HttpStatusCode.OK
+        }
+    }
+
+    should("perform input validation") {
+        testApplication {
+            application {
+                configureSerialization()
+                configureAuthentication()
+                configureRouting(meterRegistry)
+                configureStatusPages()
+            }
+
+            // too less title
+            val lessTitleResponse = client.post("/api/v1/todos") {
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody("""{"title": "T", "description": "Sample", "priority": "HIGH"}""")
+            }
+            lessTitleResponse.status shouldBe HttpStatusCode.BadRequest
+            lessTitleResponse.bodyAsText() shouldContain "Title must be between 3 and 100 characters."
+
+            //too long title
+            val longTitle = "a".repeat(101)
+            val longTitleResponse = client.post("/api/v1/todos") {
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody("""{"title": "$longTitle", "description": "Sample", "priority": "HIGH"}""")
+            }
+            longTitleResponse.status shouldBe HttpStatusCode.BadRequest
+            longTitleResponse.bodyAsText() shouldContain "Title must be between 3 and 100 characters."
+
+            //too long description
+            val longDesc = "a".repeat(501)
+            val longDescResponse = client.post("/api/v1/todos") {
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody("""{"title": "Valid Title", "description": "$longDesc", "priority": "HIGH"}""")
+            }
+            longDescResponse.status shouldBe HttpStatusCode.BadRequest
+            longDescResponse.bodyAsText() shouldContain "Description cannot exceed 500 characters."
+
+            //valid inputs
+            val response = client.post("/api/v1/todos") {
+                contentType(ContentType.Application.Json)
+                header(HttpHeaders.Authorization, "Bearer $token")
+                setBody("""{"title": "Valid Title", "description": "Valid desc", "priority": "HIGH"}""")
+            }
+            response.status shouldBe HttpStatusCode.Created
         }
     }
 
