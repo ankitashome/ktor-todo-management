@@ -1,118 +1,173 @@
-Here are the **cURL** commands to interact with the **TODO API**:
+# TODO Management API
+
+## Overview
+
+The TODO Management API is a simple RESTful service built using Ktor that allows users to manage their tasks. It supports user authentication via JWT tokens.
+
+## Tech Stack
+* Kotlin (Ktor Framework)
+* Maven (Build tool)
+* JWT Authentication (Secure API access)
+* Kotest (Unit testing)
+
+
+## Authentication
+* JWT-based authentication is used.
+* Users must register and login to get an access token.
+* The token must be included in consequent API calls via the `Authorization: Bearer <TOKEN>` header
+
+Below are the **cURL** commands to interact with the **TODO Management API**:
 
 ---
 
-## **1️⃣ Create a New TODO (POST)**
+## Authentication routes
+### Register a new user
+```sh
+curl -X POST "http://localhost:8080/auth/v1/register" \
+-H "Content-Type: application/json" \
+-d '{"username": "user1", "password": "StrongPass123!"}'
+```
+Response:
+```sh
+User user1 registered successfully
+```
+---
+
+### Login and get token
+```sh
+curl -X POST "http://localhost:8080/auth/v1/login" \
+     -H "Content-Type: application/json" \
+     -d '{"username": "user1", "password": "StrongPass123!"}'
+```
+Response:
+```json
+{
+    "token": "eyJhbGJ1c2V..."
+}
+```
+---
+
+## TODO routes
+### Create a New TODO (POST)
 ```sh
 curl -X POST http://localhost:8080/api/v1/todos \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{
            "title": "Buy groceries",
            "description": "Milk, eggs, and bread",
-           "completed": false
+           "priority": "MEDIUM"
          }'
 ```
-📌 **Response:**
+Response:
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": "479affb4-96ac-45dc-8e75-a504fecab07e",
   "title": "Buy groceries",
   "description": "Milk, eggs, and bread",
+  "priority": "MEDIUM",
   "completed": false
+
 }
 ```
-💡 The **server generates a unique `id`** (UUID) for the new TODO.
+The **server generates a unique `id`** (UUID) for the new TODO.
 
 ---
 
-## **2️⃣ Get All TODOs (GET)**
+### Get All TODOs (GET)
 ```sh
-curl -X GET http://localhost:8080/api/v1/todos
+curl -X GET http://localhost:8080/api/v1/todos \
+     -H "Authorization: Bearer <token>"
 ```
-📌 **Response:**
-```json
-[
-  {
-    "id": "550e8400-e29b-41d4-a716-446655440000",
-    "title": "Buy groceries",
-    "description": "Milk, eggs, and bread",
-    "completed": false
-  }
-]
-```
-
----
-
-## **3️⃣ Get a Specific TODO by ID (GET)**
-```sh
-curl -X GET http://localhost:8080/api/v1/todos/550e8400-e29b-41d4-a716-446655440000
-```
-📌 **Response:**
+Response:
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
-  "title": "Buy groceries",
-  "description": "Milk, eggs, and bread",
-  "completed": false
+  "todos": [
+    {
+      "id": "479affb4-96ac-45dc-8e75-a504fecab07e",
+      "title": "Buy groceries",
+      "description": "Milk, eggs, and bread",
+      "priority": "MEDIUM",
+      "completed": false
+    }
+  ]
 }
 ```
 
 ---
 
-## **4️⃣ Update a TODO (PUT)**
+### Get a Specific TODO by ID (GET)
 ```sh
-curl -X PUT http://localhost:8080/api/v1/todos/550e8400-e29b-41d4-a716-446655440000 \
+curl -X GET http://localhost:8080/api/v1/todos/479affb4-96ac-45dc-8e75-a504fecab07e \
+     -H "Authorization: Bearer <token>"
+```
+Response:
+```json
+{
+  "id": "479affb4-96ac-45dc-8e75-a504fecab07e",
+  "title": "Buy groceries",
+  "description": "Milk, eggs, and bread",
+  "priority": "MEDIUM",
+  "completed": false
+}
+```
+
+---
+
+### Update a TODO (PUT)
+```sh
+curl -X PUT http://localhost:8080/api/v1/todos/479affb4-96ac-45dc-8e75-a504fecab07e \
+     -H "Authorization: Bearer <token>" \
      -H "Content-Type: application/json" \
      -d '{
+           "id": "479affb4-96ac-45dc-8e75-a504fecab07e",
            "title": "Buy groceries",
            "description": "Milk, eggs, bread, and butter",
+           "priority": "MEDIUM",
            "completed": true
          }'
 ```
-📌 **Response:**
+Response:
 ```json
 {
-  "id": "550e8400-e29b-41d4-a716-446655440000",
+  "id": "479affb4-96ac-45dc-8e75-a504fecab07e",
   "title": "Buy groceries",
   "description": "Milk, eggs, bread, and butter",
+  "priority": "MEDIUM",
   "completed": true
 }
 ```
-💡 **The `id` remains the same**, but the description and `completed` status are updated.
+The `id` remains the same, but the `description` and `completed` status are updated.
 
 ---
 
-## **5️⃣ Delete a TODO (DELETE)**
+### Delete a TODO (DELETE)
 ```sh
-curl -X DELETE http://localhost:8080/api/v1/todos/550e8400-e29b-41d4-a716-446655440000
+curl -X DELETE http://localhost:8080/api/v1/todos/479affb4-96ac-45dc-8e75-a504fecab07e \
+     -H "Authorization: Bearer <token>"
 ```
-📌 **Response:**
+Response:
 - **If deleted successfully:** `204 No Content`
 - **If not found:** `404 Not Found`
 
 ---
 
-## **6️⃣ Attempt to Get a Deleted TODO**
-```sh
-curl -X GET http://localhost:8080/api/v1/todos/550e8400-e29b-41d4-a716-446655440000
-```
-📌 **Response:**
-```json
-{
-  "error": "TODO not found"
-}
-```
-(With a `404 Not Found` status)
+## Running the Project
+###  Prerequisites
+- Install JDK 21
+- Install Maven
 
----
+### Build and Run
+- mvn clean install
+- java -jar target/todo-management-1.0-SNAPSHOT.jar
 
-## **Summary of Endpoints**
-| Method | Endpoint | Description |
-|--------|---------|-------------|
-| `POST` | `/api/v1/todos` | Create a new TODO |
-| `GET` | `/api/v1/todos` | Get all TODOs |
-| `GET` | `/api/v1/todos/{id}` | Get a specific TODO by ID |
-| `PUT` | `/api/v1/todos/{id}` | Update an existing TODO |
-| `DELETE` | `/api/v1/todos/{id}` | Delete a TODO |
+### Running tests
+mvn test
 
-Would you like me to add authentication headers (JWT token) in the cURL requests as well? 🚀
+## Future Enhancements
+- Persistent storage
+- Users and multitenancy
+- Priority based TODO sorting
+- Simple UI
+- History of TODO item changes tracking
+
